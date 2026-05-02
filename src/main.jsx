@@ -138,7 +138,7 @@ function HomePage() {
       </section>
 
       <div className="home-actions">
-        <Link className="primary-btn" to="/write">
+        <Link className="primary-btn home-write-button" to="/write">
           카드 작성하러 가기 - ★
         </Link>
       </div>
@@ -270,12 +270,11 @@ function WritePage() {
       <section className="write-layout">
         <form className="panel write-form" onSubmit={handleSubmit}>
           <div className="section-heading">
-            <p className="eyebrow">
-              <UploadCloud size={15} />
+            <p className="eyebrow write-eyebrow">
               Send a Private Card
             </p>
-            <h1>생일 카드 작성</h1>
-            <p>표지는 모두에게 보이고, 이름과 메시지는 관리자에게만 보여요.</p>
+            <h1>카드를 작성해줘!</h1>
+            <p className="write-description">표지는 모두에게 보이고, 이름과 메시지는 관리자에게만 보여요.</p>
           </div>
 
           <label>
@@ -304,7 +303,7 @@ function WritePage() {
             <span>{form.file ? form.file.name : '카드 표지 이미지 선택'}</span>
           </label>
 
-          <button className="primary-btn submit-btn" disabled={!canSubmit} type="submit">
+          <button className="primary-btn submit-btn home-write-button" disabled={!canSubmit} type="submit">
             <Send size={18} />
             {isSubmitting ? '업로드 중...' : '제출하기'}
           </button>
