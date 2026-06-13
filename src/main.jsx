@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { supabase, supabaseEnvMissing } from './lib/supabase';
 import './styles.css';
-import homeLogo from '../asset/image/logo.png';
+import homeLogo from '../asset/image/logo-current.jpg';
 
 const storageBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'card-covers';
 const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || '';
@@ -69,11 +69,8 @@ function HomePage() {
       if (!mounted) return;
 
       if (response.error) {
-        const setupMessage =
-          response.error.code === 'PGRST205'
-            ? '아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.'
-            : 'public_cards 조회 권한이 없어요. view에 anon select 권한이 있는지 확인해 주세요.';
-        setError(setupMessage);
+        console.warn('Public cards query failed:', response.error);
+        setError('아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.');
         setCards([]);
       } else {
         setError('');
@@ -105,9 +102,11 @@ function HomePage() {
         </p>
         <img className="home-logo" src={homeLogo} alt="HBD BIN!" />
         <p className="home-description">
-          이 곳에는 사람들이 남긴 생일 카드의 겉표지만 떠있습니다.
+          벌써 한 해의 절반이 지났네요..
           <br />
-          이름과 메시지는 정빈이한테만 떠요!
+          그 말은 즉슨, 제 생일이 다가왔다는 말인데요.
+          <br />
+          생일 축하 한마디 남겨주시면 남은 하반기, 열심히 살아보도록 하겠습니다.
         </p>
       </section>
 
@@ -139,7 +138,7 @@ function HomePage() {
 
       <div className="home-actions">
         <Link className="primary-btn home-write-button" to="/write">
-          카드 작성하러 가기 - ★
+          카드 작성하러 가기
         </Link>
       </div>
     </main>

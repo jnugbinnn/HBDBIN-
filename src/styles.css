@@ -130,9 +130,9 @@ h1 {
 .home-logo {
   height: auto;
   margin: 0 auto;
-  max-height: clamp(132px, 28vw, 300px);
+  max-height: clamp(180px, 38vw, 420px);
   object-fit: contain;
-  width: min(980px, 96vw);
+  width: min(1120px, 98vw);
 }
 
 .home-copy p:not(.eyebrow),
