@@ -18,6 +18,7 @@ import homeLogo from '../asset/image/logo-current.jpg';
 
 const storageBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'card-covers';
 const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || '';
+const emptyCardsMessage = '아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.';
 
 function App() {
   return (
@@ -57,9 +58,16 @@ function HomePage() {
 
   useEffect(() => {
     let mounted = true;
+    let loadingTimer;
 
     async function fetchPublicCards() {
       setLoading(true);
+      loadingTimer = window.setTimeout(() => {
+        if (!mounted) return;
+        setError(emptyCardsMessage);
+        setCards([]);
+        setLoading(false);
+      }, 6000);
 
       const response = await supabase
         .from('public_cards')
@@ -67,10 +75,11 @@ function HomePage() {
         .order('created_at', { ascending: false });
 
       if (!mounted) return;
+      window.clearTimeout(loadingTimer);
 
       if (response.error) {
         console.warn('Public cards query failed:', response.error);
-        setError('아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.');
+        setError(emptyCardsMessage);
         setCards([]);
       } else {
         setError('');
@@ -83,6 +92,7 @@ function HomePage() {
     fetchPublicCards();
     return () => {
       mounted = false;
+      window.clearTimeout(loadingTimer);
     };
   }, []);
 
@@ -113,7 +123,7 @@ function HomePage() {
       <section className="carousel-stage" aria-label="공개 카드 표지 캐러셀">
         {loading || error || renderedCards.length === 0 ? (
           <div className="empty-carousel">
-            {loading ? '카드 표지를 불러오는 중이에요.' : error || '아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.'}
+            {error || emptyCardsMessage}
           </div>
         ) : (
           <div className="card-carousel" style={{ '--card-count': renderedCards.length }}>
@@ -212,17 +222,25 @@ function WritePage() {
     }
 
     const imagePath = createImagePath(compressedImage.extension);
+    const uploadFile = new File([compressedImage.blob], imagePath.split('/').pop(), {
+      type: compressedImage.blob.type,
+    });
 
     setStatus({ type: 'loading', message: '압축한 이미지를 업로드하는 중이에요.' });
 
-    const { error: uploadError } = await supabase.storage.from(storageBucket).upload(imagePath, compressedImage.blob, {
+    const { error: uploadError } = await supabase.storage.from(storageBucket).upload(imagePath, uploadFile, {
       cacheControl: '3600',
-      contentType: compressedImage.blob.type,
+      contentType: uploadFile.type,
       upsert: false,
     });
 
     if (uploadError) {
-      console.error('Supabase image upload failed:', uploadError);
+      console.error('Supabase image upload failed:', {
+        error: uploadError,
+        message: uploadError.message,
+        status: uploadError.status,
+        statusCode: uploadError.statusCode,
+      });
       setStatus({
         type: 'error',
         message: `이미지 업로드에 실패했어요: ${uploadError.message}`,
@@ -511,9 +529,8 @@ async function resizeImageForUpload(file) {
 
     context.drawImage(image, 0, 0, width, height);
 
-    const preferredType = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
-    const blob = await canvasToBlob(canvas, preferredType, 0.82);
-    const extension = preferredType === 'image/webp' ? 'webp' : 'jpg';
+    const blob = await canvasToBlob(canvas, 'image/jpeg', 0.82);
+    const extension = 'jpg';
 
     return { blob, extension };
   } finally {

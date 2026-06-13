@@ -56,3 +56,29 @@ using (true);
 -- For this browser-only personal project, allow anonymous uploads/selects
 -- only if you are comfortable with that tradeoff. Stronger production security
 -- should use real auth, RLS policies, and/or server-side upload endpoints.
+
+insert into storage.buckets (id, name, public)
+values ('card-covers', 'card-covers', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Allow public cover uploads" on storage.objects;
+drop policy if exists "Allow public cover reads" on storage.objects;
+drop policy if exists "Allow temporary admin cover deletes" on storage.objects;
+
+create policy "Allow public cover uploads"
+on storage.objects
+for insert
+to anon
+with check (bucket_id = 'card-covers');
+
+create policy "Allow public cover reads"
+on storage.objects
+for select
+to anon
+using (bucket_id = 'card-covers');
+
+create policy "Allow temporary admin cover deletes"
+on storage.objects
+for delete
+to anon
+using (bucket_id = 'card-covers');
