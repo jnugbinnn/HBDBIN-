@@ -61,6 +61,10 @@ insert into storage.buckets (id, name, public)
 values ('card-covers', 'card-covers', true)
 on conflict (id) do update set public = true;
 
+grant usage on schema storage to anon;
+grant select on storage.buckets to anon;
+grant insert, select, delete on storage.objects to anon;
+
 drop policy if exists "Allow public cover uploads" on storage.objects;
 drop policy if exists "Allow public cover reads" on storage.objects;
 drop policy if exists "Allow temporary admin cover deletes" on storage.objects;

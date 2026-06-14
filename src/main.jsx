@@ -96,9 +96,15 @@ function HomePage() {
     };
   }, []);
 
-  const visibleCards = cards.filter((card) => card.image_url);
-  const carouselCards = visibleCards.length > 0 ? visibleCards : [];
-  const renderedCards = carouselCards.slice(0, 12);
+  const renderedCards = useMemo(() => cards.filter((card) => card.image_url).slice(0, 12), [cards]);
+  const stickerCards = useMemo(
+    () =>
+      renderedCards.map((card, index) => ({
+        ...card,
+        stickerStyle: createStickerStyle(index),
+      })),
+    [renderedCards],
+  );
 
   return (
     <main className="home-page page">
@@ -120,22 +126,18 @@ function HomePage() {
         </p>
       </section>
 
-      <section className="carousel-stage" aria-label="공개 카드 표지 캐러셀">
-        {loading || error || renderedCards.length === 0 ? (
+      <section className="carousel-stage" aria-label="공개 카드 표지 벽">
+        {loading || error || stickerCards.length === 0 ? (
           <div className="empty-carousel">
             {error || emptyCardsMessage}
           </div>
         ) : (
-          <div className="card-carousel" style={{ '--card-count': renderedCards.length }}>
-            {renderedCards.map((card, index) => (
+          <div className="card-carousel">
+            {stickerCards.map((card, index) => (
               <article
                 className="cover-card"
                 key={card.id ?? `${card.created_at}-${index}`}
-                style={{
-                  '--index': index,
-                  '--depth-delay-desktop': `${-(28 / renderedCards.length) * index}s`,
-                  '--depth-delay-mobile': `${-(46 / renderedCards.length) * index}s`,
-                }}
+                style={card.stickerStyle}
               >
                 <img src={card.image_url} alt="생일 카드 표지" />
                 <div className="cover-card-shine" />
@@ -235,15 +237,18 @@ function WritePage() {
     });
 
     if (uploadError) {
+      const uploadErrorDetail = getSupabaseErrorDetail(uploadError);
       console.error('Supabase image upload failed:', {
         error: uploadError,
         message: uploadError.message,
         status: uploadError.status,
         statusCode: uploadError.statusCode,
+        bucket: storageBucket,
+        path: imagePath,
       });
       setStatus({
         type: 'error',
-        message: `이미지 업로드에 실패했어요: ${uploadError.message}`,
+        message: `이미지 업로드에 실패했어요: ${uploadErrorDetail}`,
       });
       setIsSubmitting(false);
       return;
@@ -512,6 +517,36 @@ function HeaderLink() {
   );
 }
 
+function createStickerStyle(index) {
+  const slots = [
+    { x: 18, y: 28, rotate: -9, scale: 0.94 },
+    { x: 39, y: 20, rotate: 6, scale: 1.04 },
+    { x: 64, y: 30, rotate: -4, scale: 0.98 },
+    { x: 83, y: 23, rotate: 8, scale: 0.9 },
+    { x: 26, y: 62, rotate: 5, scale: 1.02 },
+    { x: 52, y: 58, rotate: -7, scale: 0.95 },
+    { x: 76, y: 64, rotate: 4, scale: 1.06 },
+    { x: 12, y: 76, rotate: 8, scale: 0.86 },
+    { x: 42, y: 82, rotate: -3, scale: 0.9 },
+    { x: 91, y: 78, rotate: -8, scale: 0.88 },
+    { x: 60, y: 86, rotate: 7, scale: 0.84 },
+    { x: 7, y: 42, rotate: -5, scale: 0.82 },
+  ];
+  const slot = slots[index % slots.length];
+  const random = Math.random;
+  const jitterX = (random() - 0.5) * 8;
+  const jitterY = (random() - 0.5) * 7;
+  const jitterRotate = (random() - 0.5) * 7;
+
+  return {
+    '--sticker-x': `${Math.max(7, Math.min(93, slot.x + jitterX))}%`,
+    '--sticker-y': `${Math.max(12, Math.min(88, slot.y + jitterY))}%`,
+    '--sticker-rotate': `${slot.rotate + jitterRotate}deg`,
+    '--sticker-scale': slot.scale,
+    '--sticker-z': 10 + index,
+  };
+}
+
 async function resizeImageForUpload(file) {
   const imageUrl = URL.createObjectURL(file);
 
@@ -575,6 +610,25 @@ function createImagePath(extension) {
   const safeExtension = String(extension || 'jpg').replace(/[^a-z0-9]/g, '') || 'jpg';
   const randomId = Math.random().toString(36).slice(2, 10);
   return `covers/${Date.now()}-${randomId}.${safeExtension}`;
+}
+
+function getSupabaseErrorDetail(error) {
+  const message = error?.message || '알 수 없는 오류';
+  const status = error?.status || error?.statusCode;
+
+  if (status === 401 || /jwt|api key|unauthorized/i.test(message)) {
+    return 'Supabase 환경변수 또는 anon key를 확인해 주세요.';
+  }
+
+  if (status === 404 || /bucket|not found/i.test(message)) {
+    return 'card-covers Storage bucket이 없거나 이름이 달라요.';
+  }
+
+  if (/row-level security|permission|policy|violates/i.test(message)) {
+    return 'card-covers Storage 업로드 정책이 아직 적용되지 않았어요.';
+  }
+
+  return message;
 }
 
 function formatShortDate(value) {
