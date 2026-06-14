@@ -118,11 +118,7 @@ function HomePage() {
         </p>
         <img className="home-logo" src={homeLogo} alt="HBD BIN!" />
         <p className="home-description">
-          벌써 한 해의 절반이 지났네요..
-          <br />
-          그 말은 즉슨, 제 생일이 다가왔다는 말인데요.
-          <br />
-          생일 축하 한마디 남겨주시면 남은 하반기, 열심히 살아보도록 하겠습니다.
+          벌써 한 해의 절반이 지났네요.. 남은 올 하반기도 열심히 살라는 뜻으로 생일 축하 메세지를 남겨주세요.
         </p>
       </section>
 
