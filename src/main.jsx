@@ -20,6 +20,10 @@ const storageBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'card-cove
 const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || '';
 const emptyCardsMessage = '아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.';
 const adminContentUnlockDate = new Date('2026-06-15T15:00:00.000Z');
+const hiddenCardIds = new Set([
+  'ff0bc220-8750-4f08-808f-4cfa00053ed0',
+  '66919dc9-c887-4b8e-94d8-da6a60a02083',
+]);
 
 function App() {
   return (
@@ -97,7 +101,10 @@ function HomePage() {
     };
   }, []);
 
-  const renderedCards = useMemo(() => cards.filter((card) => card.image_url).slice(0, 12), [cards]);
+  const renderedCards = useMemo(
+    () => cards.filter((card) => card.image_url && !hiddenCardIds.has(card.id)).slice(0, 12),
+    [cards],
+  );
   const stickerCards = useMemo(
     () =>
       renderedCards.map((card, index) => ({
@@ -402,7 +409,7 @@ function AdminPage() {
       }
       setCards([]);
     } else {
-      setCards(data ?? []);
+      setCards((data ?? []).filter((card) => !hiddenCardIds.has(card.id)));
     }
 
     setLoading(false);
