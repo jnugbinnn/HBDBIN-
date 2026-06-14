@@ -582,6 +582,19 @@ textarea:focus {
   white-space: pre-wrap;
 }
 
+.locked-private-content {
+  filter: blur(7px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.admin-unlock-note {
+  color: #8a8390;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: -4px 0 0;
+}
+
 @media (max-width: 860px) {
   .home-page {
     grid-template-rows: auto auto minmax(300px, 1fr) auto;

@@ -19,6 +19,7 @@ import homeLogo from '../asset/image/logo-current.jpg';
 const storageBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'card-covers';
 const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || '';
 const emptyCardsMessage = '아직 도착한 카드가 없어요.\n첫 번째 생일 카드를 남겨보세요.';
+const adminContentUnlockDate = new Date('2026-06-15T15:00:00.000Z');
 
 function App() {
   return (
@@ -353,6 +354,7 @@ function AdminPage() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
+  const privateContentUnlocked = isAdminContentUnlocked();
 
   useEffect(() => {
     if (!authorized) return;
@@ -472,6 +474,11 @@ function AdminPage() {
         <h1>도착한 카드 전체 보기</h1>
       </section>
 
+      {!privateContentUnlocked && (
+        <div className="admin-notice">
+          작성자와 메시지는 2026년 6월 16일 00시부터 볼 수 있어요.
+        </div>
+      )}
       {notice && <div className="admin-notice">{notice}</div>}
       {loading ? (
         <div className="empty-state">카드를 불러오는 중이에요.</div>
@@ -481,16 +488,21 @@ function AdminPage() {
         <section className="admin-list">
           {cards.map((card) => (
             <article className="admin-card" key={card.id}>
-              <img src={card.image_url} alt={`${card.name} 카드 표지`} />
+              <img src={card.image_url} alt="카드 표지" />
               <div className="admin-card-body">
-                <div>
+                <div className={privateContentUnlocked ? '' : 'locked-private-content'}>
                   <strong>{card.name}</strong>
                   <p className="admin-date">
                     <CalendarDays size={14} />
                     {formatDate(card.created_at)}
                   </p>
                 </div>
-                <p className="admin-message">{card.message}</p>
+                <p className={`admin-message ${privateContentUnlocked ? '' : 'locked-private-content'}`}>
+                  {card.message}
+                </p>
+                {!privateContentUnlocked && (
+                  <p className="admin-unlock-note">내용은 6월 16일부터 볼 수 있어요.</p>
+                )}
               </div>
               <button className="danger-btn" onClick={() => handleDelete(card)} type="button">
                 <Trash2 size={17} />
@@ -511,6 +523,10 @@ function HeaderLink() {
       처음으로
     </Link>
   );
+}
+
+function isAdminContentUnlocked() {
+  return new Date() >= adminContentUnlockDate;
 }
 
 function createStickerStyle(index) {
