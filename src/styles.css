@@ -159,14 +159,14 @@ h1 {
   align-items: center;
   display: flex;
   justify-content: center;
-  min-height: clamp(360px, 48vw, 560px);
+  min-height: clamp(430px, 54vw, 680px);
   position: relative;
 }
 
 .card-carousel {
-  height: clamp(340px, 46vw, 540px);
+  height: clamp(410px, 52vw, 660px);
   position: relative;
-  width: min(1080px, 96vw);
+  width: min(1180px, 98vw);
 }
 
 .cover-card {
@@ -184,7 +184,7 @@ h1 {
     rotate(var(--sticker-rotate))
     scale(var(--sticker-scale));
   transition: transform 180ms ease;
-  width: clamp(118px, 15vw, 178px);
+  width: clamp(86px, 11vw, 142px);
   z-index: var(--sticker-z);
 }
 
@@ -629,19 +629,19 @@ textarea:focus {
     justify-content: center;
     margin-left: 0;
     margin-right: 0;
-    min-height: 390px;
+    min-height: 460px;
     overflow: hidden;
   }
 
   .card-carousel {
-    height: 370px;
+    height: 440px;
     overflow: visible;
     padding: 0;
     width: min(94vw, 420px);
   }
 
   .cover-card {
-    width: clamp(92px, 30vw, 132px);
+    width: clamp(68px, 22vw, 108px);
   }
 }
 

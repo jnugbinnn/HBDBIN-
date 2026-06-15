@@ -102,7 +102,7 @@ function HomePage() {
   }, []);
 
   const renderedCards = useMemo(
-    () => cards.filter((card) => card.image_url && !hiddenCardIds.has(card.id)).slice(0, 12),
+    () => cards.filter((card) => card.image_url && !hiddenCardIds.has(card.id)).slice(0, 24),
     [cards],
   );
   const stickerCards = useMemo(
@@ -550,6 +550,18 @@ function createStickerStyle(index) {
     { x: 91, y: 78, rotate: -8, scale: 0.88 },
     { x: 60, y: 86, rotate: 7, scale: 0.84 },
     { x: 7, y: 42, rotate: -5, scale: 0.82 },
+    { x: 31, y: 38, rotate: 10, scale: 0.78 },
+    { x: 49, y: 36, rotate: -11, scale: 0.82 },
+    { x: 70, y: 43, rotate: 9, scale: 0.76 },
+    { x: 88, y: 47, rotate: -4, scale: 0.8 },
+    { x: 18, y: 52, rotate: -12, scale: 0.78 },
+    { x: 38, y: 70, rotate: 11, scale: 0.76 },
+    { x: 66, y: 73, rotate: -10, scale: 0.78 },
+    { x: 84, y: 88, rotate: 5, scale: 0.72 },
+    { x: 24, y: 88, rotate: -6, scale: 0.74 },
+    { x: 56, y: 12, rotate: 10, scale: 0.76 },
+    { x: 73, y: 16, rotate: -8, scale: 0.74 },
+    { x: 9, y: 18, rotate: 6, scale: 0.72 },
   ];
   const slot = slots[index % slots.length];
   const random = Math.random;
